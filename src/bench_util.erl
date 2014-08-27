@@ -38,6 +38,7 @@ stat() ->
      {output_bytes, OutputBytes},
      {run_queue_length, statistics(run_queue)},
      {scheduler_wall_time, SchedulerWallTime},
+     {cpu_utilization, cpu_sup:util([per_cpu])},
      {memory_total, MemTotal},
      {memory_processes, MemProcesses},
      {memory_system, MemSystem},
@@ -116,7 +117,7 @@ report(N, Out, Prev, Curr, _) ->
                               lists:map(fun erlang:atom_to_list/1,
                                         [
                                          loop, time, reductions, context_switches,
-                                         gc_count, gc_bytes, inputs, outputs, run_queue, utilization,
+                                         gc_count, gc_bytes, inputs, outputs, run_queue, cpu_util, scheduler_util,
                                          mem_total, mem_procs, mem_sys, mem_atom, mem_bin, mem_ets,
                                          ports, processes
                                         ]),
@@ -124,21 +125,19 @@ report(N, Out, Prev, Curr, _) ->
             _ -> ok
         end,
     {PrevActiveTime, PrevTotalTime} =
-        lists:foldl(fun ({_, Active, Total}, {AccActive, AccTotal}) ->
-                            {AccActive + Active, AccTotal + Total}
-                    end,
+        lists:foldl(fun ({_, Active, Total}, {AccActive, AccTotal}) -> {AccActive + Active, AccTotal + Total} end,
                     {0, 0},
                     val(scheduler_wall_time, Prev)),
     {CurrActiveTime, CurrTotalTime} =
-        lists:foldl(fun ({_, Active, Total}, {AccActive, AccTotal}) ->
-                            {AccActive + Active, AccTotal + Total}
-                    end,
+        lists:foldl(fun ({_, Active, Total}, {AccActive, AccTotal}) -> {AccActive + Active, AccTotal + Total} end,
                     {0, 0},
                     val(scheduler_wall_time, Curr)),
     SchedulerUtilization = (CurrActiveTime - PrevActiveTime) / (CurrTotalTime - PrevTotalTime),
 
+    CpuUtilization = lists:sum([Usage || {_, Usage, _, _} <- val(cpu_utilization, Curr)]) / length(val(cpu_utilization, Curr)) / 100,
+
     _ = io:format(Out,
-                  "~p\t~s\t~p\t~p\t~p\t~p\t~p\t~p\t~p\t~f\t~p\t~p\t~p\t~p\t~p\t~p\t~p\t~p\n",
+                  "~p\t~s\t~p\t~p\t~p\t~p\t~p\t~p\t~p\t~f\t~f\t~p\t~p\t~p\t~p\t~p\t~p\t~p\t~p\n",
                   [
                    N,
                    format_datetime(calendar:local_time()),
@@ -149,6 +148,7 @@ report(N, Out, Prev, Curr, _) ->
                    delta(input_bytes, Curr, Prev),
                    delta(output_bytes, Curr, Prev),
                    val(run_queue_length, Curr),
+		   CpuUtilization,
                    SchedulerUtilization,
                    val(memory_total, Curr),
                    val(memory_processes, Curr),

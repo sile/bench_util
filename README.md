@@ -44,3 +44,9 @@ hello
 hello
 80    % elapsed time (in microseconds)
 ```
+
+References
+---------
+- http://www.slideshare.net/lpgauth/performance-optimization-101-erlang-factory-sf-2014
+- http://www.erlang-factory.com/upload/presentations/795/lkubica_erlangfactory_2013.pdf
+- https://www.erlang-solutions.com/resources/webinars/understanding-erlang-scheduler
