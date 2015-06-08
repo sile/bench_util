@@ -97,9 +97,9 @@ do_output(State = #state{prev_stat = Prev}) ->
         lists:foldl(fun ({_, Active, Total}, {AccActive, AccTotal}) -> {AccActive + Active, AccTotal + Total} end,
                     {0, 0},
                     val(scheduler_wall_time, Curr)),
-    SchedulerUtilization = (CurrActiveTime - PrevActiveTime) / (CurrTotalTime - PrevTotalTime),
+    SchedulerUtilization = (CurrActiveTime - PrevActiveTime) / (CurrTotalTime - PrevTotalTime) * 100,
 
-    CpuUtilization = lists:sum([Usage || {_, Usage, _, _} <- val(cpu_utilization, Curr)]) / length(val(cpu_utilization, Curr)) / 100,
+    CpuUtilization = lists:sum([Usage || {_, Usage, _, _} <- val(cpu_utilization, Curr)]) / length(val(cpu_utilization, Curr)),
 
     Headers =
         [
