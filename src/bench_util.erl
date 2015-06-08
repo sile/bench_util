@@ -10,6 +10,8 @@
 -export([sar/1]).
 -export([dotimes/2]).
 -export([dotimes_tc/2]).
+-export([start_sar_log_server/3]).
+-export([stop_sar_log_server/1]).
 
 %%----------------------------------------------------------------------------------------------------------------------
 %% Exported Functions
@@ -83,6 +85,18 @@ sar(Options) ->
              Out,
              stat(),
              Options).
+
+%% @doc 統計ログ出力サーバを起動する
+-spec start_sar_log_server(atom(), logi:logger(), pos_integer()) -> {ok, pid()} | {error, Reason::term()}.
+start_sar_log_server(ServerName, Logger, IntervalSeconds) ->
+    bench_util_sar_log_server_sup:start_child(ServerName, {Logger, IntervalSeconds}).
+
+%% @doc 統計ログ出力サーバを停止する
+%%
+%% 指定のサーバが存在しない場合は単に無視される
+-spec stop_sar_log_server(atom()) -> ok.
+stop_sar_log_server(ServerName) ->
+    bench_util_sar_log_server_sup:stop_child(ServerName).
 
 %%----------------------------------------------------------------------------------------------------------------------
 %% Internal Functions

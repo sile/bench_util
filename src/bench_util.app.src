@@ -3,11 +3,13 @@
  [
   {description, "A collection of benchmark utility functions"},
   {vsn, git},
-  {registered, []},
+  {registered, [bench_util_sup, bench_util_sar_log_server_sup]},
   {applications, [
                   kernel,
                   stdlib,
-                  os_mon
+                  os_mon,
+                  logi
                  ]},
+  {mod, {bench_util_app, []}},
   {env, []}
  ]}.
